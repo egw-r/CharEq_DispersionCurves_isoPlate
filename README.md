@@ -47,8 +47,8 @@ import matplotlib as mpl
 ```
 'elasticity' is elasticity.py and the rest are common scientific packages: numpy and matplotlib.
 
-time and multiprocessing are to keep track of how long a full calculation takes and multiprocessing is so that all the 
-threads of your computer processor will be used for calculation purposes.
+'time' and 'multiprocessing' are to keep track of how long a full calculation takes and and allows all the 
+threads of your computer processor to be used for calculation purposes.
 
 ### Installing
 
