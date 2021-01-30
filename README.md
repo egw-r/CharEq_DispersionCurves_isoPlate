@@ -70,6 +70,9 @@ When tested by calculating solutions between phase velocities of 200 m/s and 100
 between 1 Hz and 20 MHz, the symmetric and anti-symmetric modes were calculated in about 96 sec with a conservative 
 estimate of the accuracy being 10^-3 rad/m.
 
+The SH0 mode appears in the dispersion curve solutions because both the LHS and RHS of the characteristic equation 
+become zero when the phase velocity is equal to the shear wave speed.
+
 ## Authors
 
 * **Christopher Hakoda** - *Initial work* - [egw-r](https://github.com/egw-r/)
