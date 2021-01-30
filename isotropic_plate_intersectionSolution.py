@@ -297,10 +297,10 @@ print('Calculations Done, Close Figure Windows to Finish Process...')
 mpl.rcParams['font.size'] = 14
 
 f1 = plt.figure(1)
-plt.plot(np.real(sol_sym[:, 0])/(10**6), np.real(sol_sym[:, 0]*2*np.pi/sol_sym[:, 1])/1000, '.k',
-         np.real(sol_asym[:, 0])/(10**6), np.real(sol_asym[:, 0]*2*np.pi/sol_asym[:, 1])/1000, '.r')
+ax11, = plt.plot(np.real(sol_sym[:, 0])/(10**6), np.real(sol_sym[:, 0]*2*np.pi/sol_sym[:, 1])/1000, '.k')
+ax12, = plt.plot(np.real(sol_asym[:, 0])/(10**6), np.real(sol_asym[:, 0]*2*np.pi/sol_asym[:, 1])/1000, '.r')
 plt.axis([0, 20, 0, 10])
-plt.legend({'symmetric', 'antisymmetric'})
+plt.legend(handles=[ax11, ax12], labels={'symmetric', 'antisymmetric'})
 plt.ylabel('Phase Velocity (m/s)')
 plt.xlabel('Frequency (MHz)')
 
