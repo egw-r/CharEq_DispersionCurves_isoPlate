@@ -30,6 +30,8 @@ cmax = 10000  # m/s; approx. max phase velocity
 fmin = 1  # Hz; linspace used so this isn't the real min
 fmax = 20e6  # Hz; maximum frequency
 
+error_threshold = 0.01  # rad/m; max variation
+
 
 def char_eq(k=1, freq=1e6):
     """
@@ -152,7 +154,7 @@ def my_solver(k_start=1, num_points=500, freq=1e6, k_end=100000, solution_type='
     return -1, -1, -1  # used for terminating refinement process
 
 
-def my_refiner(k_start=1, freq=1e6, num_points=500, error_threshold=0.01, solution_type='symmetric'):
+def my_refiner(k_start=1, freq=1e6, num_points=500, solution_type='symmetric'):
     """
     Parameters
     ----------
@@ -165,9 +167,6 @@ def my_refiner(k_start=1, freq=1e6, num_points=500, error_threshold=0.01, soluti
 
     freq: Type, float
     DESCRIPTION. frequency value at which roots are solved at. {default: 1e6 Hz}
-
-    error_threshold: Type, float
-    DESCRIPTION. the maximum amount of error allowable in the root. {default: 0.01 rad/m}
 
     solution_type: Type, string
     DESCRIPTION. either symmetric or antisymmetric. {default: symmetric}
@@ -207,7 +206,7 @@ def my_refiner(k_start=1, freq=1e6, num_points=500, error_threshold=0.01, soluti
     return k_final, k_next_root, error
 
 
-def main_solver(freq=1e6, num_points=500, error_threshold=0.01, solution_type='symmetric'):
+def main_solver(freq=1e6, num_points=500, solution_type='symmetric'):
     """
     Parameters
     ----------
@@ -217,9 +216,6 @@ def main_solver(freq=1e6, num_points=500, error_threshold=0.01, solution_type='s
 
     freq: Type, float
     DESCRIPTION. frequency value at which roots are solved at. {default: 1e6 Hz}
-
-    error_threshold: Type, float
-    DESCRIPTION. the maximum amount of error allowable in the root. {default: 0.01 rad/m}
 
     solution_type: Type, string
     DESCRIPTION. either symmetric or antisymmetric. {default: symmetric}
@@ -236,7 +232,7 @@ def main_solver(freq=1e6, num_points=500, error_threshold=0.01, solution_type='s
     error = 1  # initializing variable
     solution = np.array([[0, 0, 0]], dtype='complex')  # initializing the solution output variable
     while error != -1:
-        k_final, k_next, error = my_refiner(k_start=k_next, freq=freq, num_points=num_points, error_threshold=error_threshold, solution_type=solution_type)
+        k_final, k_next, error = my_refiner(k_start=k_next, freq=freq, num_points=num_points, solution_type=solution_type)
         if error != -1:
             add_on = np.array([[complex(freq, 0), k_final, error]])  # new results to add to 'solution'
             solution = np.append(solution, add_on, 0)
@@ -250,10 +246,10 @@ def saving_data(filename, data):
     Parameters
     ----------
     filename: Type, string
-    DESCRIPTION: the filename that the data will be saved to with suffix '.txt'.
+    DESCRIPTION. the filename that the data will be saved to with suffix '.txt'.
 
     data: Type, Ndarray and complex
-    DESCRIPTION: the data to be saved to file.
+    DESCRIPTION. the data to be saved to file.
 
     Returns
     -------
