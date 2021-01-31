@@ -17,6 +17,7 @@ import elasticity as es
 import time
 import matplotlib.pyplot as plt
 import multiprocessing as mp
+from functools import partial
 import matplotlib as mpl
 
 
@@ -267,22 +268,21 @@ def saving_data(filename, data):
 # frequencies.
 
 
-def sym_func(x):
-    return main_solver(freq=x, num_points=500, solution_type='symmetric')
-
-
-def asym_func(x):
-    return main_solver(freq=x, num_points=500, solution_type='antisymmetric')
-
-
 print('Calculating Roots of Characteristic Equation...')
 start_time = time.time()  # starts a timer to know how long the solver runs
-pool = mp.Pool(processes=None)
+pool = mp.Pool(processes=None)  # starts multiprocessing pool
 
-freq_array = np.linspace(start=fmin, stop=fmax, num=200)
+freq_array = np.linspace(start=fmin, stop=fmax, num=200)  # define iterable frequency array
 
+# freezes some argurments since the pool can only handle passing in one argument
+sym_func = partial(main_solver, num_points=500, solution_type='symmetric')
+asym_func = partial(main_solver, num_points=500, solution_type='antisymmetric')
+
+# performing multiprocessing
 raw_sym = pool.map(func=sym_func, iterable=freq_array)
 raw_asym = pool.map(func=asym_func, iterable=freq_array)
+pool.close()
+pool.join()
 
 sol_sym = np.concatenate(raw_sym, axis=0)  # takes the raw output and formats it for plotting
 sol_asym = np.concatenate(raw_asym, axis=0)  # takes the raw output and formats it for plotting
