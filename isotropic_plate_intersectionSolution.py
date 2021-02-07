@@ -254,7 +254,7 @@ def saving_data(filename, data):
 
     Returns
     -------
-    file formatted as [omega,real wavenumber, imag wavenumber, error]
+    file formatted as [freq, real wavenumber, imag wavenumber, error]
     """
     formatted_data = np.column_stack((np.real(data[:, 0]), np.real(data[:, 1]), np.imag(data[:, 1]), np.real(data[:, 2])))
     np.savetxt(filename+".txt", formatted_data, delimiter=',')
