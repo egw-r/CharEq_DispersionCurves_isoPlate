@@ -297,18 +297,18 @@ print('Calculations Done, Close Figure Windows to Finish Process...')
 mpl.rcParams['font.size'] = 14
 
 f1 = plt.figure(1)
-ax11, = plt.plot(np.real(sol_sym[:, 0])/(10**6), np.real(sol_sym[:, 0]*2*np.pi/sol_sym[:, 1])/1000, '.k')
-ax12, = plt.plot(np.real(sol_asym[:, 0])/(10**6), np.real(sol_asym[:, 0]*2*np.pi/sol_asym[:, 1])/1000, '.r')
+ax11, = plt.plot(np.real(sol_sym[:, 0])/(10**6), np.real(sol_sym[:, 0]*2*np.pi/sol_sym[:, 1])/1000, '.k', label='symmetric')
+ax12, = plt.plot(np.real(sol_asym[:, 0])/(10**6), np.real(sol_asym[:, 0]*2*np.pi/sol_asym[:, 1])/1000, '.r', label='antisymmetric')
 plt.axis([0, 20, 0, 10])
-plt.legend(handles=[ax11, ax12], labels={'symmetric', 'antisymmetric'})
+plt.legend()
 plt.ylabel('Phase Velocity (km/s)')
 plt.xlabel('Frequency (MHz)')
 
 f2 = plt.figure(2)
-plt.semilogy(np.absolute(sol_sym[:, 0])/(10**6), np.absolute(sol_sym[:, 2]), '.k',
-             np.absolute(sol_asym[:, 0])/(10**6), np.absolute(sol_asym[:, 2]), '.r')
+plt.semilogy(np.absolute(sol_sym[:, 0])/(10**6), np.absolute(sol_sym[:, 2]), '.k', label='symmetric')
+plt.semilogy(np.absolute(sol_asym[:, 0])/(10**6), np.absolute(sol_asym[:, 2]), '.r', label='antisymmetric')
 plt.xlim([0, 20])
-plt.legend({'symmetric', 'antisymmetric'})
+plt.legend()
 plt.title('Errors for each root')
 
 plt.show()
