@@ -254,7 +254,7 @@ def saving_data(filename, data):
 
     Returns
     -------
-    file formatted as [omega,real wavenumber, imag wavenumber, error]
+    file formatted as [freq, real wavenumber, imag wavenumber, error]
     """
     formatted_data = np.column_stack((np.real(data[:, 0]), np.real(data[:, 1]), np.imag(data[:, 1]), np.real(data[:, 2])))
     np.savetxt(filename+".txt", formatted_data, delimiter=',')
@@ -301,7 +301,7 @@ ax11, = plt.plot(np.real(sol_sym[:, 0])/(10**6), np.real(sol_sym[:, 0]*2*np.pi/s
 ax12, = plt.plot(np.real(sol_asym[:, 0])/(10**6), np.real(sol_asym[:, 0]*2*np.pi/sol_asym[:, 1])/1000, '.r')
 plt.axis([0, 20, 0, 10])
 plt.legend(handles=[ax11, ax12], labels={'symmetric', 'antisymmetric'})
-plt.ylabel('Phase Velocity (m/s)')
+plt.ylabel('Phase Velocity (km/s)')
 plt.xlabel('Frequency (MHz)')
 
 f2 = plt.figure(2)
