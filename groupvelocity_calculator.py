@@ -248,6 +248,7 @@ def isotropic_multiple(disp, omega, k, rho, lamb, mu):
     cgx.shape = (len(cgx), 1)
     return np.hstack((omega, k, cgx))
 
+
 def isotropic_single(omega, k, thickness, rho, lamb, mu, solution_type):
     """
     Parameters
