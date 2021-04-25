@@ -34,6 +34,64 @@ fmax = 20e6  # Hz; maximum frequency
 error_threshold = 0.01  # rad/m; max variation
 
 
+def main():
+    # Note to self: make sure num_points is high enough otherwise some solutions will not be found. This is easier to find
+    # when sweeping from low frequency to higher frequencies because, generally, num_points has to be higher for higher
+    # frequencies.
+
+    print('Calculating Roots of Characteristic Equation...')
+    start_time = time.time()  # starts a timer to know how long the solver runs
+    pool = mp.Pool(processes=None)  # starts multiprocessing pool
+
+    freq_array = np.linspace(start=fmin, stop=fmax, num=200)  # define iterable frequency array
+
+    # freezes some argurments since the pool can only handle passing in one argument
+    sym_func = partial(main_solver, num_points=500, solution_type='symmetric')
+    asym_func = partial(main_solver, num_points=500, solution_type='antisymmetric')
+
+    # performing multiprocessing
+    raw_sym = pool.map(func=sym_func, iterable=freq_array)
+    raw_asym = pool.map(func=asym_func, iterable=freq_array)
+    pool.close()
+    pool.join()
+
+    sol_sym = np.concatenate(raw_sym, axis=0)  # takes the raw output and formats it for plotting
+    sol_asym = np.concatenate(raw_asym, axis=0)  # takes the raw output and formats it for plotting
+
+    saving_data('symmetric_solution', sol_sym)
+    saving_data('antisymmetric_solution', sol_asym)
+
+    print('The solver ran for ' + str(time.time() - start_time) + ' secs.')
+    print('Calculations Done, Close Figure Windows to Finish Process...')
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Plotting    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    mpl.rcParams['font.size'] = 14
+
+    f1 = plt.figure(1)
+    ax11, = plt.plot(np.real(sol_sym[:, 0]) / (10 ** 6), np.real(sol_sym[:, 0] * 2 * np.pi / sol_sym[:, 1]) / 1000,
+                     '.k', label='symmetric')
+    ax12, = plt.plot(np.real(sol_asym[:, 0]) / (10 ** 6), np.real(sol_asym[:, 0] * 2 * np.pi / sol_asym[:, 1]) / 1000,
+                     '.r', label='antisymmetric')
+    plt.axis([0, 20, 0, 10])
+    plt.legend()
+    plt.ylabel('Phase Velocity (km/s)')
+    plt.xlabel('Frequency (MHz)')
+
+    f2 = plt.figure(2)
+    plt.semilogy(np.absolute(sol_sym[:, 0]) / (10 ** 6), np.absolute(sol_sym[:, 2]), '.k', label='symmetric')
+    plt.semilogy(np.absolute(sol_asym[:, 0]) / (10 ** 6), np.absolute(sol_asym[:, 2]), '.r', label='antisymmetric')
+    plt.xlim([0, 20])
+    plt.legend()
+    plt.title('Errors for each root')
+
+    plt.show()
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Functions Below   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 def char_eq(k=1, freq=1e6):
     """
     Parameters
@@ -260,55 +318,5 @@ def saving_data(filename, data):
     np.savetxt(filename+".txt", formatted_data, delimiter=',')
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Functions Above   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Solving Below   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# Note to self: make sure num_points is high enough otherwise some solutions will not be found. This is easier to find
-# when sweeping from low frequency to higher frequencies because, generally, num_points has to be higher for higher
-# frequencies.
-
-
-print('Calculating Roots of Characteristic Equation...')
-start_time = time.time()  # starts a timer to know how long the solver runs
-pool = mp.Pool(processes=None)  # starts multiprocessing pool
-
-freq_array = np.linspace(start=fmin, stop=fmax, num=200)  # define iterable frequency array
-
-# freezes some argurments since the pool can only handle passing in one argument
-sym_func = partial(main_solver, num_points=500, solution_type='symmetric')
-asym_func = partial(main_solver, num_points=500, solution_type='antisymmetric')
-
-# performing multiprocessing
-raw_sym = pool.map(func=sym_func, iterable=freq_array)
-raw_asym = pool.map(func=asym_func, iterable=freq_array)
-pool.close()
-pool.join()
-
-sol_sym = np.concatenate(raw_sym, axis=0)  # takes the raw output and formats it for plotting
-sol_asym = np.concatenate(raw_asym, axis=0)  # takes the raw output and formats it for plotting
-
-saving_data('symmetric_solution', sol_sym)
-saving_data('antisymmetric_solution', sol_asym)
-
-print('The solver ran for ' + str(time.time()-start_time) + ' secs.')
-print('Calculations Done, Close Figure Windows to Finish Process...')
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Plotting    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-mpl.rcParams['font.size'] = 14
-
-f1 = plt.figure(1)
-ax11, = plt.plot(np.real(sol_sym[:, 0])/(10**6), np.real(sol_sym[:, 0]*2*np.pi/sol_sym[:, 1])/1000, '.k', label='symmetric')
-ax12, = plt.plot(np.real(sol_asym[:, 0])/(10**6), np.real(sol_asym[:, 0]*2*np.pi/sol_asym[:, 1])/1000, '.r', label='antisymmetric')
-plt.axis([0, 20, 0, 10])
-plt.legend()
-plt.ylabel('Phase Velocity (km/s)')
-plt.xlabel('Frequency (MHz)')
-
-f2 = plt.figure(2)
-plt.semilogy(np.absolute(sol_sym[:, 0])/(10**6), np.absolute(sol_sym[:, 2]), '.k', label='symmetric')
-plt.semilogy(np.absolute(sol_asym[:, 0])/(10**6), np.absolute(sol_asym[:, 2]), '.r', label='antisymmetric')
-plt.xlim([0, 20])
-plt.legend()
-plt.title('Errors for each root')
-
-plt.show()
+if __name__ == "__main__":
+    main()

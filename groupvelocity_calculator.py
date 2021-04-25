@@ -22,6 +22,84 @@ import matplotlib as mpl
 num_points = 101  # number of points to integrate over; must be odd
 
 
+def main():
+    mat_thick = 0.001  # m
+    mat_rho = 2700  # kg/m^3
+    mat_lamb = 5.697675e10  # Pa
+    mat_mu = 2.5947e10  # Pa
+
+    # this file is assumed to be comma-separated and formatted as [freq,real(wavenumber),imag(wavenumber),...whatever else]
+    filepath1 = "symmetric_solution.txt"
+    filepath2 = "antisymmetric_solution.txt"
+
+    print('Calculating the group velocity...')
+    start_time = time.time()  # starts a timer to know how long the solver runs
+
+    data1 = np.loadtxt(filepath1, delimiter=',')
+    data2 = np.loadtxt(filepath2, delimiter=',')
+
+    omega1 = data1[:, 0] * 2 * np.pi
+    omega1 = omega1.astype(np.complex128)  # change imported data to complex type
+    k1 = data1[:, 1] + 1j * data1[:, 2]
+    k1 = k1.astype(np.complex128)  # change imported data to complex type
+
+    omega2 = data2[:, 0] * 2 * np.pi
+    omega2 = omega2.astype(np.complex128)  # change imported data to complex type
+    k2 = data2[:, 1] + 1j * data2[:, 2]
+    k2 = k2.astype(np.complex128)  # change imported data to complex type
+
+    sym_disp = symmetric_disp_multiple(omega=omega1, k=k1, thickness=mat_thick, rho=mat_rho, lamb=mat_lamb, mu=mat_mu)
+    asym_disp = antisymmetric_disp_multiple(omega=omega2, k=k2, thickness=mat_thick, rho=mat_rho, lamb=mat_lamb,
+                                            mu=mat_mu)
+
+    sym_result = isotropic_multiple(disp=sym_disp, omega=omega1, k=k1, rho=mat_rho, lamb=mat_lamb, mu=mat_mu)
+    asym_result = isotropic_multiple(disp=asym_disp, omega=omega2, k=k2, rho=mat_rho, lamb=mat_lamb, mu=mat_mu)
+
+    sym_result[:, 0] = sym_result[:, 0] / (2 * np.pi)  # changing from omega to frequency
+    asym_result[:, 0] = asym_result[:, 0] / (2 * np.pi)
+
+    # uses the filepath name as a basis for saving new data; this does not save the previous error data and replaces it
+    # with the group velocity in the fourth column.
+    saving_data(filepath1[:-4], sym_result)
+    saving_data(filepath2[:-4], asym_result)
+
+    print('The solver ran for ' + str(time.time() - start_time) + ' secs.')
+    print('Calculations Done, Close Figure Windows to Finish Process...')
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Plotting    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    mpl.rcParams['font.size'] = 14
+
+    f1 = plt.figure(1)
+    plt.plot(np.real(sym_result[:, 0]) / (10 ** 6), np.real(sym_result[:, 0] * 2 * np.pi / sym_result[:, 1]) / 1000,
+             '.k', label='symmetric')
+    plt.plot(np.real(asym_result[:, 0]) / (10 ** 6), np.real(asym_result[:, 0] * 2 * np.pi / asym_result[:, 1]) / 1000,
+             '.r', label='antisymmetric')
+    plt.axis([0, 20, 0, 10])
+    plt.legend()
+    plt.ylabel('Phase Velocity (km/s)')
+    plt.xlabel('Frequency (MHz)')
+
+    f2 = plt.figure(2)
+    # absolute value applied here because the group velocity is negative due to the original wave propagation assumption
+    # used in the derivation of the displacement profile expression being a backward propagating wave. In other words the
+    # absolute value is purely aesthetic feel free to remove it and adjust axis for a more accurate representation.
+    ax11, = plt.plot(np.real(sym_result[:, 0]) / (10 ** 6), np.abs(np.real(sym_result[:, 2])) / 1000, '.k',
+                     label='symmetric')
+    ax12, = plt.plot(np.real(asym_result[:, 0]) / (10 ** 6), np.abs(np.real(asym_result[:, 2])) / 1000, '.r',
+                     label='antisymmetric')
+    plt.axis([0, 20, 0, 6])
+    plt.legend()
+    plt.ylabel('Group Velocity (km/s)')
+    plt.xlabel('Frequency (MHz)')
+
+    plt.show()
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Functions Below  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 def symmetric_disp_multiple(omega, k, thickness, rho, lamb, mu):
     """
     Parameters
@@ -330,71 +408,5 @@ def saving_data(filename, data):
     np.savetxt(filename+"_addGroupVelocity.txt", formatted_data, delimiter=',')
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Functions Above   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Solving Below   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-mat_thick = 0.001  # m
-mat_rho = 2700  # kg/m^3
-mat_lamb = 5.697675e10  # Pa
-mat_mu = 2.5947e10  # Pa
-
-# this file is assumed to be comma-separated and formatted as [freq,real(wavenumber),imag(wavenumber),...whatever else]
-filepath1 = "symmetric_solution.txt"
-filepath2 = "antisymmetric_solution.txt"
-
-print('Calculating the group velocity...')
-start_time = time.time()  # starts a timer to know how long the solver runs
-
-data1 = np.loadtxt(filepath1, delimiter=',')
-data2 = np.loadtxt(filepath2, delimiter=',')
-
-omega1 = data1[:, 0]*2*np.pi
-omega1 = omega1.astype(np.complex128)  # change imported data to complex type
-k1 = data1[:, 1]+1j*data1[:, 2]
-k1 = k1.astype(np.complex128)  # change imported data to complex type
-
-omega2 = data2[:, 0]*2*np.pi
-omega2 = omega2.astype(np.complex128)  # change imported data to complex type
-k2 = data2[:, 1]+1j*data2[:, 2]
-k2 = k2.astype(np.complex128)  # change imported data to complex type
-
-sym_disp = symmetric_disp_multiple(omega=omega1, k=k1, thickness=mat_thick, rho=mat_rho, lamb=mat_lamb, mu=mat_mu)
-asym_disp = antisymmetric_disp_multiple(omega=omega2, k=k2, thickness=mat_thick, rho=mat_rho, lamb=mat_lamb, mu=mat_mu)
-
-sym_result = isotropic_multiple(disp=sym_disp, omega=omega1, k=k1, rho=mat_rho, lamb=mat_lamb, mu=mat_mu)
-asym_result = isotropic_multiple(disp=asym_disp, omega=omega2, k=k2, rho=mat_rho, lamb=mat_lamb, mu=mat_mu)
-
-sym_result[:, 0] = sym_result[:, 0]/(2*np.pi)  # changing from omega to frequency
-asym_result[:, 0] = asym_result[:, 0]/(2*np.pi)
-
-# uses the filepath name as a basis for saving new data; this does not save the previous error data and replaces it
-# with the group velocity in the fourth column.
-saving_data(filepath1[:-4], sym_result)
-saving_data(filepath2[:-4], asym_result)
-
-print('The solver ran for ' + str(time.time()-start_time) + ' secs.')
-print('Calculations Done, Close Figure Windows to Finish Process...')
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Plotting    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-mpl.rcParams['font.size'] = 14
-
-f1 = plt.figure(1)
-plt.plot(np.real(sym_result[:, 0])/(10**6), np.real(sym_result[:, 0]*2*np.pi/sym_result[:, 1])/1000, '.k', label='symmetric')
-plt.plot(np.real(asym_result[:, 0])/(10**6), np.real(asym_result[:, 0]*2*np.pi/asym_result[:, 1])/1000, '.r', label='antisymmetric')
-plt.axis([0, 20, 0, 10])
-plt.legend()
-plt.ylabel('Phase Velocity (km/s)')
-plt.xlabel('Frequency (MHz)')
-
-f2 = plt.figure(2)
-# absolute value applied here because the group velocity is negative due to the original wave propagation assumption
-# used in the derivation of the displacement profile expression being a backward propagating wave. In other words the
-# absolute value is purely aesthetic feel free to remove it and adjust axis for a more accurate representation.
-ax11, = plt.plot(np.real(sym_result[:, 0])/(10**6), np.abs(np.real(sym_result[:, 2]))/1000, '.k', label='symmetric')
-ax12, = plt.plot(np.real(asym_result[:, 0])/(10**6), np.abs(np.real(asym_result[:, 2]))/1000, '.r', label='antisymmetric')
-plt.axis([0, 20, 0, 6])
-plt.legend()
-plt.ylabel('Group Velocity (km/s)')
-plt.xlabel('Frequency (MHz)')
-
-plt.show()
+if __name__ == "__main__":
+    main()
