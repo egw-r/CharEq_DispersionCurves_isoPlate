@@ -16,6 +16,17 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 
 
+def main():
+    phase_plot(sym_filepath="symmetric_solution.txt", asym_filepath="antisymmetric_solution.txt", fig_num=1)
+    phase_and_group_plot(sym_filepath="symmetric_solution_addGroupVelocity.txt", asym_filepath="antisymmetric_solution_addGroupVelocity.txt", fig_num=3)
+    # plt.savefig('exampleSVG', format="svg")  # for saving the figures as an svg file
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Functions Below   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 def phase_plot(sym_filepath, asym_filepath, fig_num):
     """
     Parameters
@@ -113,10 +124,5 @@ def phase_and_group_plot(sym_filepath, asym_filepath, fig_num):
     plt.show()
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Functions Above   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    Solving Below   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-phase_plot(sym_filepath="symmetric_solution.txt", asym_filepath="antisymmetric_solution.txt", fig_num=1)
-phase_and_group_plot(sym_filepath="symmetric_solution_addGroupVelocity.txt", asym_filepath="antisymmetric_solution_addGroupVelocity.txt", fig_num=3)
-
-# plt.savefig('exampleSVG', format="svg")  # for saving the figures as an svg file
+if __name__ == "__main__":
+    main()
