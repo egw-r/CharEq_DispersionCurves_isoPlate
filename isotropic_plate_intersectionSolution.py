@@ -13,12 +13,12 @@ Usage:
 """
 
 import numpy as np
-import elasticity as es
 import time
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 from functools import partial
 import matplotlib as mpl
+import elasticity as es
 
 
 # Setting Global Parameters
